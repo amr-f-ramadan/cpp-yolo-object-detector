@@ -3,14 +3,13 @@
 # Download YOLO v3-tiny model files
 echo "Downloading YOLO v3-tiny model files..."
 
+# Ensure we're in the model directory
+cd "$(dirname "$0")"
+echo "Working in directory: $(pwd)"
+
 # Download weights file (35MB) from the official source
-echo "Attempting to download yolov3-tiny.weights..."
-
-# Try multiple sources
-WEIGHTS_DOWNLOADED=false
-
-# Download weights file (35MB)
 echo "Downloading yolov3-tiny.weights..."
+WEIGHTS_DOWNLOADED=false
 
 if curl -L --fail -o yolov3-tiny.weights "https://data.pjreddie.com/files/yolov3-tiny.weights" 2>/dev/null; then
     # Check if file is the correct size (should be exactly 35,434,956 bytes)
@@ -31,14 +30,15 @@ if [ "$WEIGHTS_DOWNLOADED" = false ]; then
     echo ""
     echo "❌ Automatic download failed. Please download manually:"
     echo ""
-    echo "Download command:"
+    echo "Download command (run from model directory):"
+    echo "   cd $(pwd)"
     echo "   curl -L -o yolov3-tiny.weights https://data.pjreddie.com/files/yolov3-tiny.weights"
     echo ""
     echo "Or with wget:"
     echo "   wget https://data.pjreddie.com/files/yolov3-tiny.weights"
     echo ""
     echo "The file should be exactly 35,434,956 bytes (35MB)"
-    echo "Place the downloaded file in this directory: $(pwd)"
+    echo "Verify with: ls -la yolov3-tiny.weights"
     echo ""
 fi
 

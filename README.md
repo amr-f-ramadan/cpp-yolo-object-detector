@@ -175,14 +175,17 @@ make
 #### "Failed to open NetParameter file: ../model/yolov3-tiny.cfg"
 **Error**: `error: (-212:Parsing error) Failed to open NetParameter file`
 
-**Solution**: You're running the application from the wrong directory. The app expects to be run from `build/`:
+**Solution**: You're running the application from the wrong directory. The app must be run from the `build/` directory:
 ```bash
+# Correct way:
 cd build
 ./objectdetector --input=../data/dogs.jpg
 
-# NOT from root directory like this:
-# ./build/objectdetector --input=data/dogs.jpg  # This can cause path issues
+# Wrong way (causes this error):
+./build/objectdetector --input=data/dogs.jpg  # Don't do this
 ```
+
+**Why**: The application uses hardcoded relative paths (`../model/`) that expect to be run from the build directory.
 
 #### "Failed to parse NetParameter file: ../model/yolov3-tiny.weights"
 **Error**: `OpenCV(4.12.0) ... error: (-212:Parsing error) Failed to parse NetParameter file`
@@ -255,8 +258,10 @@ Options:
 
 ### Examples
 ```bash
-# Basic usage (run from build directory)
+# IMPORTANT: Run from the build/ directory for correct relative paths
 cd build
+
+# Basic usage
 ./objectdetector --input=../data/dogs.jpg
 
 # With custom thresholds
@@ -265,11 +270,11 @@ cd build
 # High precision detection
 ./objectdetector --input=../data/bicycle.jpg --conf=0.8 --nms=0.2
 
-# From root directory (alternative)
-./build/objectdetector --input=data/dogs.jpg
+# Show help
+./objectdetector --help
 ```
 
-> **💡 Note**: The application expects to be run from the `build/` directory because it uses relative paths to find model files (`../model/`). If you run from the root directory, use `./build/objectdetector` instead.
+> **⚠️ Important**: You must run the application from the `build/` directory because it uses hardcoded relative paths to find model files (`../model/`). Running from other directories will cause "Failed to open NetParameter file" errors.
 
 ### Docker Usage Examples
 ```bash
