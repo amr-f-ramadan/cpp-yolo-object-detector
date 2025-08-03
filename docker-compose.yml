@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  yolo-object-detector:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: yolo-detector
+    volumes:
+      # Mount local data and output directories
+      - ./data:/app/data:ro  # Read-only access to input data
+      - ./output:/app/output:rw  # Read-write access to output directory
+      # Optional: Mount additional input directory from host
+      - ${HOST_INPUT_DIR:-./data}:/app/input:ro
+    environment:
+      # Set display for X11 forwarding (Linux/macOS with XQuartz)
+      - DISPLAY=${DISPLAY:-:0}
+      # Performance optimization environment variables
+      - OMP_NUM_THREADS=${OMP_NUM_THREADS:-4}
+      - OPENCV_DNN_BACKEND=${OPENCV_DNN_BACKEND:-DEFAULT}
+    # For X11 display support on Linux
+    network_mode: host
+    # Override default command to run with specific image
+    command: ["./objectdetector", "--input=/app/data/people.jpg", "--conf=0.5", "--nms=0.4"]
+
+  # Alternative service for interactive usage
+  yolo-detector-interactive:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: yolo-detector-interactive
+    volumes:
+      - ./data:/app/data:ro
+      - ./output:/app/output:rw
+      - ${HOST_INPUT_DIR:-./data}:/app/input:ro
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+      - OMP_NUM_THREADS=${OMP_NUM_THREADS:-4}
+    stdin_open: true
+    tty: true
+    entrypoint: ["/bin/bash"]
+
+  # Service for batch processing multiple images
+  yolo-detector-batch:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: yolo-detector-batch
+    volumes:
+      - ./data:/app/data:ro
+      - ./output:/app/output:rw
+      - ${HOST_INPUT_DIR:-./data}:/app/input:ro
+    environment:
+      - OMP_NUM_THREADS=${OMP_NUM_THREADS:-4}
+    command: >
+      bash -c "
+        echo 'Starting batch processing of all images in /app/data...' &&
+        echo 'Performance optimization: Using $${OMP_NUM_THREADS} threads' &&
+        processed=0 &&
+        for img in /app/data/*.jpg /app/data/*.png /app/data/*.jpeg; do
+          if [ -f \"$$img\" ]; then
+            echo \"[$$((++processed))] Processing: $$(basename \"$$img\")\" &&
+            start_time=$$(date +%s%N) &&
+            ./objectdetector --input=\"$$img\" --conf=0.5 --nms=0.4 &&
+            end_time=$$(date +%s%N) &&
+            duration=$$((($${end_time} - $${start_time}) / 1000000)) &&
+            echo \"  └─ Completed in $${duration}ms\"
+          fi
+        done &&
+        echo \"Batch processing complete! Processed $$processed images.\" &&
+        echo \"Results saved to /app/output/\"
+      "
+
+  # Development service with mounted source code
+  yolo-detector-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: yolo-detector-dev
+    volumes:
+      - ./src:/app/src:ro
+      - ./include:/app/include:ro
+      - ./data:/app/data:ro
+      - ./output:/app/output:rw
+      - ./build:/app/build:rw
+    environment:
+      - OMP_NUM_THREADS=${OMP_NUM_THREADS:-4}
+    working_dir: /app/build
+    stdin_open: true
+    tty: true
+    entrypoint: ["/bin/bash"]
+    command: >
+      bash -c "
+        echo 'Development environment ready!' &&
+        echo 'Source code mounted for live development' &&
+        echo 'Run: cmake .. && make to rebuild' &&
+        echo 'Run: ./objectdetector --help for usage' &&
+        /bin/bash
+      "
