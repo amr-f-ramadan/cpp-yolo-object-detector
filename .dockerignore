@@ -1,0 +1,45 @@
+# Docker ignore file for YOLO Object Detector
+# Ignore build artifacts
+build/
+*.o
+*.so
+*.a
+*.exe
+
+# Ignore IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore version control
+.git/
+.gitignore
+
+# Ignore documentation that's not needed in container
+*.md
+docs/
+
+# Ignore already downloaded model files if they exist in host
+# (they will be downloaded fresh in container)
+model/*.weights
+model/*.cfg
+model/*.names
+
+# Ignore output files (will be generated in container)
+output/*.jpg
+output/*.png
+output/*.jpeg
+
+# Ignore temporary files
+*.tmp
+*.temp
+.cache/
+
+# Ignore logs
+*.log
