@@ -47,11 +47,6 @@ Thumbs.db
 # Model files (large, will be downloaded)
 model/*.weights
 
-# Output images (generated)
-output/*.jpg
-output/*.png
-output/*.jpeg
-
 # Logs
 *.log
 

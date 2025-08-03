@@ -52,7 +52,11 @@ This is my **capstone project** for the [Udacity C++ Nanodegree Program](https:/
 ## 📁 Project Structure
 
 ```
-├── src/                    # Source files
+cpp-yolo-object-detector/
+├── .github/               # GitHub Actions CI/CD workflows
+│   └── workflows/
+│       └── ci.yml         # Automated testing and builds
+├── src/                   # Source files
 │   ├── main.cpp           # Entry point with command-line parsing
 │   ├── input.cpp          # Image/video input handling
 │   ├── object_detector.cpp # YOLO detection implementation
@@ -63,17 +67,33 @@ This is my **capstone project** for the [Udacity C++ Nanodegree Program](https:/
 │   ├── object_detector.h  # Detection class interface
 │   └── output.h           # Output class interface
 ├── model/                 # YOLO model files
-│   ├── getModel.sh        # Automated model downloading
+│   ├── getModel.sh        # Automated model downloading script
 │   ├── yolov3-tiny.cfg    # Model configuration
-│   ├── yolov3-tiny.weights # Pre-trained weights
-│   └── coco.names         # Object class labels
+│   ├── yolov3-tiny.weights # Pre-trained weights (downloaded)
+│   └── coco.names         # Object class labels (80 classes)
 ├── data/                  # Sample input images
+│   ├── people.jpg         # People detection sample
+│   ├── dogs.jpg           # Animal detection sample
+│   ├── cars.jpg           # Vehicle detection sample
+│   ├── bicycle.jpg        # Transportation sample
+│   ├── airplane.jpg       # Aircraft detection sample
+│   └── cats.jpg           # Pet detection sample
 ├── output/                # Generated detection results
-├── build/                 # Compiled binaries
+│   └── out.jpg            # Latest detection output
+├── build/                 # Compiled binaries (generated)
+│   └── objectdetector     # Main executable
+├── .devcontainer/         # VS Code development container
+│   └── devcontainer.json  # Container configuration
 ├── Dockerfile             # Container configuration
 ├── docker-compose.yml     # Multi-service deployment
+├── .dockerignore          # Docker build exclusions
+├── .gitignore             # Git exclusions
 ├── CMakeLists.txt         # Build configuration
-└── README.md             # This file
+├── CONTRIBUTING.md        # Development guidelines
+├── DOCKER_README.md       # Docker usage instructions
+├── PERFORMANCE.md         # Benchmarks and optimization
+├── download_test_images.py # Test image downloader
+└── README.md              # This file
 ```
 
 
@@ -131,7 +151,7 @@ cmake ..
 make
 
 # 4. Run object detection
-./objectdetector --input=../data/people.jpg --conf=0.5 --nms=0.4
+./objectdetector --input=../data/dogs.jpg --conf=0.5 --nms=0.4
 ```
 
 ## 💻 Usage
@@ -150,7 +170,7 @@ Options:
 ### Examples
 ```bash
 # Basic usage
-./objectdetector --input=../data/people.jpg
+./objectdetector --input=../data/dogs.jpg
 
 # With custom thresholds
 ./objectdetector --input=../data/cars.jpg --conf=0.7 --nms=0.3
@@ -163,7 +183,7 @@ Options:
 ```bash
 # Process single image
 docker run --rm -v $(pwd)/data:/app/data -v $(pwd)/output:/app/output \
-  yolo-detector ./objectdetector --input=/app/data/people.jpg
+  yolo-detector ./objectdetector --input=/app/data/dogs.jpg
 
 # Batch process all images
 docker-compose up yolo-detector-batch

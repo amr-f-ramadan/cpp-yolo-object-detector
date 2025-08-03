@@ -21,7 +21,7 @@ services:
     # For X11 display support on Linux
     network_mode: host
     # Override default command to run with specific image
-    command: ["./objectdetector", "--input=/app/data/people.jpg", "--conf=0.5", "--nms=0.4"]
+    command: ["./objectdetector", "--input=/app/data/dogs.jpg", "--conf=0.5", "--nms=0.4"]
 
   # Alternative service for interactive usage
   yolo-detector-interactive:
