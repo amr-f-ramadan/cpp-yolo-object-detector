@@ -48,6 +48,20 @@ This is my **capstone project** for the [Udacity C++ Nanodegree Program](https:/
 4. **Code Quality & Maintainability**:
    - Clean separation of concerns with dedicated classes
    - Comprehensive documentation and inline comments
+
+### 🆕 Recent Fixes & Improvements (August 2025)
+
+5. **Image Loading Fixes**:
+   - Fixed OpenCV VideoCapture issues with static images
+   - Replaced VideoCapture with proper cv::imread() for image files
+   - Added better error handling for invalid image formats
+   - Improved compatibility with various image types
+
+6. **Headless Operation Support**:
+   - Added `--headless` command-line option for GUI-free operation
+   - Perfect for Docker containers and server environments
+   - Maintains full functionality without display dependencies
+   - Automatic output saving with user feedback
    - CMake build system with proper dependency management
    - Cross-platform compatibility (Linux, macOS, Windows)
 
@@ -253,6 +267,7 @@ Options:
   -i, --input     Input image file path (required)
   -c, --conf      Confidence threshold (0.0-1.0, default: 0.5)
   -n, --nms       Non-max suppression threshold (0.0-1.0, default: 0.4)
+  --headless      Run without GUI display (for headless environments)
   -h, --help      Show usage information
 ```
 
@@ -262,25 +277,31 @@ Options:
 cd build
 
 # Basic usage
-./objectdetector --input=../data/dogs.jpg
+./objectdetector --input=../data/cars.jpg
+
+# Headless mode (no GUI display) - useful for containers and servers
+./objectdetector --input=../data/cars.jpg --headless
 
 # With custom thresholds
 ./objectdetector --input=../data/cars.jpg --conf=0.7 --nms=0.3
 
-# High precision detection
-./objectdetector --input=../data/bicycle.jpg --conf=0.8 --nms=0.2
+# High precision detection in headless mode
+./objectdetector --input=../data/bicycle.jpg --conf=0.8 --nms=0.2 --headless
 
 # Show help
 ./objectdetector --help
 ```
 
-> **⚠️ Important**: You must run the application from the `build/` directory because it uses hardcoded relative paths to find model files (`../model/`). Running from other directories will cause "Failed to open NetParameter file" errors.
+> **⚠️ Important**: 
+> - You must run the application from the `build/` directory because it uses hardcoded relative paths to find model files (`../model/`). Running from other directories will cause "Failed to open NetParameter file" errors.
+> - Some sample images in the `data/` folder are not valid JPEG files (e.g., `dogs.jpg` is actually an ISO Media file). Use `cars.jpg`, `coffee.jpg`, or `people.jpg` for reliable testing.
+> - Use the `--headless` flag when running in containers or environments without a display to avoid GUI-related errors.
 
 ### Docker Usage Examples
 ```bash
-# Process single image
+# Process single image in headless mode (recommended for containers)
 docker run --rm -v $(pwd)/data:/app/data -v $(pwd)/output:/app/output \
-  yolo-detector ./objectdetector --input=/app/data/dogs.jpg
+  yolo-detector ./objectdetector --input=/app/data/cars.jpg --headless
 
 # Batch process all images
 docker-compose up yolo-detector-batch

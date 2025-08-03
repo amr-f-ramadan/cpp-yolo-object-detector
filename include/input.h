@@ -15,5 +15,5 @@ public:
 
 protected:
     bool end_of_file_;  //end of image file
-    cv::VideoCapture cap_; //get image through cv
+    std::string input_path_; //path to input image file
 };

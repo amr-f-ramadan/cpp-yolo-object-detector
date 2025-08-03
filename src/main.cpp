@@ -21,7 +21,8 @@ int main(int argc, char **argv)
         "{help h usage ? | | Usage examples: \n\t\t./object_etector --image=../data/bird.jpg}"
         "{c conf         |   .5 | Confidence threshold. }"
         "{n nms          |   .4 | Non-max suppression threshold. }"
-        "{input i        |<none>| Input image. }";
+        "{input i        |<none>| Input image. }"
+        "{headless       |      | Run without GUI display (for headless environments). }";
         
     cv::CommandLineParser parser(argc, argv, keys);
     parser.about("Use this script to detect objects in an image file using OpenCV.");
@@ -33,6 +34,7 @@ int main(int argc, char **argv)
      // Get the conf and nms thresholds if specified.
     float conf_threshold = parser.get<float>("c");
     float nms_threshold = parser.get<float>("n");
+    bool headless = parser.has("headless");
 
     // Check for valid input file. Open a video file or an image file or a camera stream.
     if (parser.has("input")) {
@@ -49,11 +51,16 @@ int main(int argc, char **argv)
         cv::Mat detected_frame = detector->DetectObjects(frame);
         std::unique_ptr<Output> output = std::make_unique<Output>(image_out);
         output->WriteFrame(detected_frame);
-        static const std::string kWinName = "Deep learning object detection in OpenCV";
-        namedWindow(kWinName, cv::WINDOW_NORMAL);
-        imshow(kWinName, frame);
-        cv::waitKey(10000);
-        cv::destroyAllWindows();
+        std::cout << "Object detection completed. Output saved to: " << image_out << std::endl;
+        
+        // Display GUI only if not in headless mode
+        if (!headless) {
+            static const std::string kWinName = "Deep learning object detection in OpenCV";
+            namedWindow(kWinName, cv::WINDOW_NORMAL);
+            imshow(kWinName, detected_frame);
+            cv::waitKey(10000);
+            cv::destroyAllWindows();
+        }
     }
 
     else {
