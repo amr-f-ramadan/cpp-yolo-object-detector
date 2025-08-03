@@ -1,0 +1,89 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        compiler: [gcc, clang]
+        build_type: [Release, Debug]
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake build-essential libopencv-dev
+    
+    - name: Setup compiler
+      run: |
+        if [ "${{ matrix.compiler }}" = "clang" ]; then
+          sudo apt-get install -y clang
+          echo "CC=clang" >> $GITHUB_ENV
+          echo "CXX=clang++" >> $GITHUB_ENV
+        fi
+    
+    - name: Download YOLO models
+      run: |
+        cd model
+        chmod +x getModel.sh
+        ./getModel.sh
+    
+    - name: Configure CMake
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+    
+    - name: Build
+      run: |
+        cd build
+        make -j$(nproc)
+    
+    - name: Test
+      run: |
+        cd build
+        ./objectdetector --help
+        ./objectdetector --input=../data/people.jpg --conf=0.5 --nms=0.4
+
+  docker:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Build Docker image
+      run: docker build -t yolo-detector .
+    
+    - name: Test Docker container
+      run: |
+        docker run --rm yolo-detector ./objectdetector --help
+        docker run --rm -v $(pwd)/data:/app/data yolo-detector ./objectdetector --input=/app/data/people.jpg
+
+  code-quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install clang-format
+      run: sudo apt-get install -y clang-format
+    
+    - name: Check code formatting
+      run: |
+        find src include -name "*.cpp" -o -name "*.h" | xargs clang-format --dry-run --Werror
+    
+    - name: Install cppcheck
+      run: sudo apt-get install -y cppcheck
+    
+    - name: Run static analysis
+      run: |
+        cppcheck --enable=all --std=c++17 --suppress=missingIncludeSystem src/ include/
